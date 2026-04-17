@@ -14,7 +14,188 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cover_letters: {
+        Row: {
+          cover_letter: string
+          created_at: string
+          id: string
+          job_id: string
+          tailored_summary: string | null
+        }
+        Insert: {
+          cover_letter: string
+          created_at?: string
+          id?: string
+          job_id: string
+          tailored_summary?: string | null
+        }
+        Update: {
+          cover_letter?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+          tailored_summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cover_letters_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fetch_runs: {
+        Row: {
+          error: string | null
+          finished_at: string | null
+          id: string
+          jobs_found: number | null
+          jobs_new: number | null
+          jobs_scored: number | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          jobs_found?: number | null
+          jobs_new?: number | null
+          jobs_scored?: number | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          jobs_found?: number | null
+          jobs_new?: number | null
+          jobs_scored?: number | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          company: string
+          company_logo: string | null
+          created_at: string
+          description: string | null
+          fit_gaps: string[] | null
+          fit_score: number | null
+          fit_strengths: string[] | null
+          fit_summary: string | null
+          id: string
+          job_type: string | null
+          location: string | null
+          posted_at: string | null
+          salary: string | null
+          source: string
+          source_id: string
+          status: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          company: string
+          company_logo?: string | null
+          created_at?: string
+          description?: string | null
+          fit_gaps?: string[] | null
+          fit_score?: number | null
+          fit_strengths?: string[] | null
+          fit_summary?: string | null
+          id?: string
+          job_type?: string | null
+          location?: string | null
+          posted_at?: string | null
+          salary?: string | null
+          source: string
+          source_id: string
+          status?: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          company?: string
+          company_logo?: string | null
+          created_at?: string
+          description?: string | null
+          fit_gaps?: string[] | null
+          fit_score?: number | null
+          fit_strengths?: string[] | null
+          fit_summary?: string | null
+          id?: string
+          job_type?: string | null
+          location?: string | null
+          posted_at?: string | null
+          salary?: string | null
+          source?: string
+          source_id?: string
+          status?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      profile: {
+        Row: {
+          created_at: string
+          cv_text: string | null
+          email: string | null
+          exclude_keywords: string[] | null
+          full_name: string | null
+          github_url: string | null
+          id: string
+          linkedin_url: string | null
+          min_fit_score: number | null
+          portfolio_url: string | null
+          target_keywords: string[] | null
+          target_role: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cv_text?: string | null
+          email?: string | null
+          exclude_keywords?: string[] | null
+          full_name?: string | null
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          min_fit_score?: number | null
+          portfolio_url?: string | null
+          target_keywords?: string[] | null
+          target_role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cv_text?: string | null
+          email?: string | null
+          exclude_keywords?: string[] | null
+          full_name?: string | null
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          min_fit_score?: number | null
+          portfolio_url?: string | null
+          target_keywords?: string[] | null
+          target_role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
