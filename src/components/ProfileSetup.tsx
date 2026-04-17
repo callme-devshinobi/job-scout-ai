@@ -172,13 +172,49 @@ export const ProfileSetup = ({ profile, onSaved }: Props) => {
         </div>
       </div>
 
+      <div className="mt-6 p-4 rounded-lg border border-dashed border-border bg-secondary/30">
+        <Label className="mb-2 block">Upload CV (PDF)</Label>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button asChild variant="secondary" size="sm" disabled={uploading}>
+            <label className="cursor-pointer">
+              {uploading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Upload className="size-3.5" />
+              )}
+              {uploading ? "Reading PDF…" : "Choose PDF"}
+              <input
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handlePdfUpload}
+                disabled={uploading}
+              />
+            </label>
+          </Button>
+          {form.cv_file_name && (
+            <a
+              href={form.cv_pdf_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline inline-flex items-center gap-1.5"
+            >
+              <FileText className="size-3.5" /> {form.cv_file_name}
+            </a>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          Text is extracted automatically and used for AI matching. Max 10MB.
+        </p>
+      </div>
+
       <div className="mt-4">
-        <Label>CV / Resume (paste full text)</Label>
+        <Label>CV / Resume text {form.cv_text && <span className="text-xs text-muted-foreground">({form.cv_text.length} chars)</span>}</Label>
         <Textarea
           rows={10}
           value={form.cv_text}
           onChange={(e) => setForm({ ...form, cv_text: e.target.value })}
-          placeholder="Paste the plain text content of your CV here…"
+          placeholder="Upload a PDF above, or paste your CV here…"
           className="font-mono text-xs"
         />
       </div>
