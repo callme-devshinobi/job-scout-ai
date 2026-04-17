@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { Upload, FileText, Loader2 } from "lucide-react";
+import { extractPdfText } from "@/lib/pdf";
 import type { Profile } from "@/lib/types";
 
 interface Props {
@@ -21,12 +23,51 @@ export const ProfileSetup = ({ profile, onSaved }: Props) => {
     linkedin_url: profile?.linkedin_url || "",
     github_url: profile?.github_url || "",
     cv_text: profile?.cv_text || "",
+    cv_pdf_url: profile?.cv_pdf_url || "",
+    cv_file_name: profile?.cv_file_name || "",
     target_role: profile?.target_role || "Frontend Developer",
     target_keywords: (profile?.target_keywords || ["react", "typescript", "frontend"]).join(", "),
     exclude_keywords: (profile?.exclude_keywords || []).join(", "),
     min_fit_score: profile?.min_fit_score || 60,
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast.error("Please select a PDF file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("PDF must be under 10MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const text = await extractPdfText(file);
+      const path = `cv-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+      const { error: upErr } = await supabase.storage.from("cvs").upload(path, file, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("cvs").getPublicUrl(path);
+      setForm((f) => ({
+        ...f,
+        cv_text: text || f.cv_text,
+        cv_pdf_url: publicUrl,
+        cv_file_name: file.name,
+      }));
+      toast.success(`Extracted ${text.length} characters from PDF`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to read PDF");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const save = async () => {
     if (!form.cv_text.trim()) {
@@ -131,13 +172,49 @@ export const ProfileSetup = ({ profile, onSaved }: Props) => {
         </div>
       </div>
 
+      <div className="mt-6 p-4 rounded-lg border border-dashed border-border bg-secondary/30">
+        <Label className="mb-2 block">Upload CV (PDF)</Label>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button asChild variant="secondary" size="sm" disabled={uploading}>
+            <label className="cursor-pointer">
+              {uploading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Upload className="size-3.5" />
+              )}
+              {uploading ? "Reading PDF…" : "Choose PDF"}
+              <input
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handlePdfUpload}
+                disabled={uploading}
+              />
+            </label>
+          </Button>
+          {form.cv_file_name && (
+            <a
+              href={form.cv_pdf_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline inline-flex items-center gap-1.5"
+            >
+              <FileText className="size-3.5" /> {form.cv_file_name}
+            </a>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          Text is extracted automatically and used for AI matching. Max 10MB.
+        </p>
+      </div>
+
       <div className="mt-4">
-        <Label>CV / Resume (paste full text)</Label>
+        <Label>CV / Resume text {form.cv_text && <span className="text-xs text-muted-foreground">({form.cv_text.length} chars)</span>}</Label>
         <Textarea
           rows={10}
           value={form.cv_text}
           onChange={(e) => setForm({ ...form, cv_text: e.target.value })}
-          placeholder="Paste the plain text content of your CV here…"
+          placeholder="Upload a PDF above, or paste your CV here…"
           className="font-mono text-xs"
         />
       </div>

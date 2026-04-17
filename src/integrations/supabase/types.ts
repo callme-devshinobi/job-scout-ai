@@ -151,6 +151,8 @@ export type Database = {
       profile: {
         Row: {
           created_at: string
+          cv_file_name: string | null
+          cv_pdf_url: string | null
           cv_text: string | null
           email: string | null
           exclude_keywords: string[] | null
@@ -166,6 +168,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          cv_file_name?: string | null
+          cv_pdf_url?: string | null
           cv_text?: string | null
           email?: string | null
           exclude_keywords?: string[] | null
@@ -181,6 +185,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          cv_file_name?: string | null
+          cv_pdf_url?: string | null
           cv_text?: string | null
           email?: string | null
           exclude_keywords?: string[] | null
