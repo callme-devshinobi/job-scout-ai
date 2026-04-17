@@ -1,1 +1,10 @@
 project_id = "bjpnuthtfxomzbuozelm"
+
+[functions.fetch-jobs]
+verify_jwt = false
+
+[functions.score-jobs]
+verify_jwt = false
+
+[functions.generate-cover-letter]
+verify_jwt = false
