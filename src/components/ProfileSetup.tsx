@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { Upload, FileText, Loader2 } from "lucide-react";
+import { extractPdfText } from "@/lib/pdf";
 import type { Profile } from "@/lib/types";
 
 interface Props {
@@ -21,12 +23,51 @@ export const ProfileSetup = ({ profile, onSaved }: Props) => {
     linkedin_url: profile?.linkedin_url || "",
     github_url: profile?.github_url || "",
     cv_text: profile?.cv_text || "",
+    cv_pdf_url: profile?.cv_pdf_url || "",
+    cv_file_name: profile?.cv_file_name || "",
     target_role: profile?.target_role || "Frontend Developer",
     target_keywords: (profile?.target_keywords || ["react", "typescript", "frontend"]).join(", "),
     exclude_keywords: (profile?.exclude_keywords || []).join(", "),
     min_fit_score: profile?.min_fit_score || 60,
   });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast.error("Please select a PDF file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("PDF must be under 10MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const text = await extractPdfText(file);
+      const path = `cv-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+      const { error: upErr } = await supabase.storage.from("cvs").upload(path, file, {
+        contentType: "application/pdf",
+        upsert: true,
+      });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("cvs").getPublicUrl(path);
+      setForm((f) => ({
+        ...f,
+        cv_text: text || f.cv_text,
+        cv_pdf_url: publicUrl,
+        cv_file_name: file.name,
+      }));
+      toast.success(`Extracted ${text.length} characters from PDF`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to read PDF");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  };
 
   const save = async () => {
     if (!form.cv_text.trim()) {
