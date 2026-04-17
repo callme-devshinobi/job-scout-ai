@@ -10,6 +10,8 @@ export interface Profile {
   target_keywords: string[] | null;
   exclude_keywords: string[] | null;
   min_fit_score: number | null;
+  cv_pdf_url?: string | null;
+  cv_file_name?: string | null;
 }
 
 export interface Job {
