@@ -1,5 +1,5 @@
 import * as pdfjs from "pdfjs-dist";
-// @ts-expect-error - vite worker import
+// @ts-ignore - vite worker import
 import workerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
